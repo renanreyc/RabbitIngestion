@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ndp-ingestion
+  namespace: dataplatform-ingestion
+  labels:
+    app: ndp-ingestion
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ndp-ingestion
+  template:
+    metadata:
+      labels:
+        app: ndp-ingestion
+    spec:
+      imagePullSecrets: 
+      - name: acrprdng011920179-auth
+      containers:
+        - name: ndp-ingestion
+          image: acrprdng01.azurecr.io/dataplatform-ndp-ingestion:0.0.1
+          imagePullPolicy: Always
+          command: ["python"]
+          args: ["src/process.py"]
+          envFrom:
+            - secretRef:
+                name: ndp-ingestion-secrets
+          ports:
+            - containerPort: 8079
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+            requests:
+              cpu: 500m
+              memory: 256Mi         

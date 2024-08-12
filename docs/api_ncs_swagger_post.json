@@ -1,0 +1,536 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "NCS - Ingestion API",
+    "description": "This api aims to serve as a file ingestion integrated with neogrid's data lake.",
+    "version": "v1",
+    "x-logo": {
+      "url": "https://id.neogrid.com/identity/resources/images/logo-secondary.svg",
+      "altText": "Neogrid"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://ncs-dev-01.ngintad.local/ingestion",
+      "description": "Development environment."
+    },
+    {
+      "url": "http://ncs-stg-01.viveiro.local/ingestion",
+      "description": "Staging environment"
+    },
+    {
+      "url": "http://ncs-prd-01.viveiro.local/ingestion",
+      "description": "Production environment"
+    }
+  ],
+  "paths": {
+    "/api/v1/data": {
+      "post": {
+        "tags": [
+          "Data"
+        ],
+        "summary": "Uploads a single document synchronously.",
+        "description": "This endpoint is recommended for files smaller than 2mb.",
+        "parameters": [
+          {
+            "name": "documentId",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "layout",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-ncs-partition",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "File": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "Encoding": {
+                    "type": "string"
+                  },
+                  "IsFirstContent": {
+                    "type": "boolean"
+                  },
+                  "ReceiptDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "Metadata": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/MetadataRequestModel"
+                    }
+                  },
+                  "Links": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/DocumentRelationModel"
+                    }
+                  }
+                }
+              },
+              "encoding": {
+                "File": {
+                  "style": "form"
+                },
+                "Encoding": {
+                  "style": "form"
+                },
+                "IsFirstContent": {
+                  "style": "form"
+                },
+                "ReceiptDate": {
+                  "style": "form"
+                },
+                "Metadata": {
+                  "style": "form"
+                },
+                "Links": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The response containing the result of the upload operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentResponseModel"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Data"
+        ],
+        "summary": "Update the document metadata",
+        "description": "Update the document metadata and links by specified rowkey(documentId)",
+        "parameters": [
+          {
+            "name": "x-ncs-partition",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDocumentCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/data/async": {
+      "post": {
+        "tags": [
+          "Data"
+        ],
+        "summary": "Uploads multiple documents asynchronously.",
+        "description": "This endpoint receive the same payload structure as sync operation. This operation use\r\nstreaming, and may take some time depending on the size",
+        "parameters": [
+          {
+            "name": "documentId",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "layout",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-ncs-partition",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The response containing the result of the batch upload operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DocumentResponseModel"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/data/copy": {
+      "post": {
+        "tags": [
+          "Data"
+        ],
+        "summary": "Duplicates a document and the file through an already stored document.",
+        "description": "This endpoint performs the inclusion of a document that is a copy of another document by rowkey.",
+        "parameters": [
+          {
+            "name": "x-ncs-partition",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CopyDocumentCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The response containing the result of the copy operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentResponseModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/data/link": {
+      "post": {
+        "tags": [
+          "Data"
+        ],
+        "summary": "Creates a link between documents.",
+        "parameters": [
+          {
+            "name": "x-ncs-partition",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The command containing the link information.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkDocumentCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The link was created successfully."
+          },
+          "400": {
+            "description": "Bad request. The provided data is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CopyDocumentCommand": {
+        "type": "object",
+        "properties": {
+          "targetLayout": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceLayout": {
+            "type": "string",
+            "nullable": true
+          },
+          "documentId": {
+            "type": "string",
+            "nullable": true
+          },
+          "isReferenced": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DirectionRelationEnum": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "DocumentRelationModel": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "indexed": {
+            "type": "boolean"
+          },
+          "reverseLink": {
+            "type": "boolean"
+          },
+          "documentParentId": {
+            "type": "string",
+            "nullable": true
+          },
+          "direction": {
+            "$ref": "#/components/schemas/DirectionRelationEnum"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DocumentResponseModel": {
+        "type": "object",
+        "properties": {
+          "rowKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "layout": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentType": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentLength": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LinkDocumentCommand": {
+        "type": "object",
+        "properties": {
+          "documentId": {
+            "type": "string",
+            "nullable": true
+          },
+          "layout": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentRelationModel"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Metadata": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MetadataRequestModel": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": { }
+      },
+      "UpdateDocumentCommand": {
+        "type": "object",
+        "properties": {
+          "documentId": {
+            "type": "string",
+            "nullable": true
+          },
+          "layout": {
+            "type": "string",
+            "nullable": true
+          },
+          "metadata": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Metadata"
+            },
+            "nullable": true
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentRelationModel"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+    "idDeliveryQueue": 10640108,
+    "origin": "",
+    "tx": "17132107640011222798",
+    "contentType": "application/octet-stream",
+    "senderCode": "42281485000189",
+    "senderType": "CNPJ",
+    "receiverCode": "42281485000189",
+    "receiverType": "CNPJ",
+    "repositoryId": "17132102232517733f743582d4fbdbb005055553dddf6",
+    "layout": "NGP001#PROCESS#17132107640011222798",
+    "originalFilename": "32231204876292000181550010000338271782107024-nfe.ngp",
+    "tenant": "trimak",
+    "documentType": 143,
+    "dataType": 1,
+    "format": ""
+}
