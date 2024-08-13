@@ -8,14 +8,14 @@ from utils.utils import Utils
 class OBS:
     def __init__(self):
         self._logger = logging.getLogger(name="Huawei OBS Tools")
-        self._aws_access_key_id = os.environ.get("dev_aws_access_key_id", '.env') 
-        self._aws_secret_access_key = os.environ.get("dev_aws_secret_access_key", '.env')
-        self._endpoint_url = os.environ.get("dev_aws_endpoint_url", '.env')
-        self._region_name = os.environ.get("dev_aws_region_name", '.env')
-        self.aws_s3_allow_unsafe_rename = os.environ.get("dev_aws_s3_allow_unsafe_rename", '.env')
+        self._aws_access_key_id = os.environ.get("aws_access_key_id", '.env') 
+        self._aws_secret_access_key = os.environ.get("aws_secret_access_key", '.env')
+        self._endpoint_url = os.environ.get("aws_endpoint_url", '.env')
+        self._region_name = os.environ.get("aws_region_name", '.env')
+        self.aws_s3_allow_unsafe_rename = os.environ.get("aws_s3_allow_unsafe_rename", '.env')
 
-        self.BUCKET_NAME = os.environ.get("dev_aws_bucket_name", '.env')
-        self.BUCKET_TMP_NAME = os.environ.get("dev_aws_bucket_temp_name", ".env")
+        self.BUCKET_NAME = os.environ.get("aws_bucket_name", '.env')
+        self.BUCKET_TMP_NAME = os.environ.get("aws_bucket_temp_name", ".env")
         
         self._utils = Utils()
         self._utils.start_logging('Huawei OBS Tools')

@@ -19,8 +19,8 @@ class ConnectionManager:
         new ConnectionManager class
 
         """
-        self.get_url = os.environ.get('preprod_ncs_get_url', '.env') 
-        self.post_url = os.environ.get('preprod_ncs_post_url', '.env')
+        self.get_url = os.environ.get('ncs_get_url', '.env') 
+        self.post_url = os.environ.get('ncs_post_url', '.env')
         self._utils = Utils()
         self._utils.start_logging('start logging ConnectionManager.')
 

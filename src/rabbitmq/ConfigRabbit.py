@@ -12,13 +12,13 @@ from utils.utils import Utils
 
 class ConsumeRabbit:
     def __init__(self): 
-        self.__temp_root = os.environ.get("preprod_ncs_output_root_path")
-        self.__aws_root = os.environ.get("dev_aws_root_path")
-        self.__username = os.environ.get("preprod_rabbit_username")
-        self.__password = os.environ.get("preprod_rabbit_password")
-        self.__host = os.environ.get("preprod_rabbit_host")
-        self.__port = os.environ.get("preprod_rabbit_port")
-        self.__virtual_host = os.environ.get("preprod_rabbit_virtual_host")
+        self.__temp_root = os.environ.get("ncs_output_root_path")
+        self.__aws_root = os.environ.get("aws_root_path")
+        self.__username = os.environ.get("rabbit_username")
+        self.__password = os.environ.get("rabbit_password")
+        self.__host = os.environ.get("rabbit_host")
+        self.__port = os.environ.get("rabbit_port")
+        self.__virtual_host = os.environ.get("rabbit_virtual_host")
 
         self._utils = Utils()
         self._utils.start_logging('start logging ConsumeRabbit')
