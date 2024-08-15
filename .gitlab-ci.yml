@@ -34,6 +34,7 @@ build_docker:
   only:
     refs:
       - main
+      - develop
 
 deploy_prd:
   stage: deploy_prd 
@@ -41,6 +42,7 @@ deploy_prd:
   only:
     refs:
       - main
+      - develop
   variables:
     NAMESPACE: dataplatform-ingestion
     RAW_BUCKET_NAME: bucket-prd-data-platform-raw-01
@@ -67,10 +69,11 @@ deploy_prd:
       envsubst < k8s/app-vars.yaml > temp/app-vars.yaml
       envsubst < k8s/deployment.yml > temp/deployment.yml
       envsubst < k8s/registry-secrets.yml > temp/registry-secrets.yml
-      envsubst < k8s/shared-pv.yaml > temp/shared-pv.yaml
-      envsubst < k8s/shared-pvc.yaml > temp/shared-pvc.yaml
-      envsubst < k8s/obs-secret.yaml > temp/obs-secret.yaml
-      cat "$PRD_KUBE_CONFIG" > kubeconfig.yaml
-      kubectl --kubeconfig kubeconfig.yaml create namespace $NAMESPACE || echo "namespace $NAMESPACE ja existe"
-      kubectl --kubeconfig kubeconfig.yaml -n $NAMESPACE apply -f temp/
-      
+      cat temp/registry-secrets.yml
+  # envsubst < k8s/obs-secret.yaml > temp/obs-secret.yaml
+  # envsubst < k8s/shared-pv.yaml > temp/shared-pv.yaml
+  # envsubst < k8s/shared-pvc.yaml > temp/shared-pvc.yaml
+  # cat "$PRD_KUBE_CONFIG" > kubeconfig.yaml
+  # kubectl --kubeconfig kubeconfig.yaml create namespace $NAMESPACE || echo "namespace $NAMESPACE ja existe"
+  # kubectl --kubeconfig kubeconfig.yaml -n $NAMESPACE apply -f temp/
+  
