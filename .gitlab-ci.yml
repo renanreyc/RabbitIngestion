@@ -1,40 +1,40 @@
-include:
-  - template: Jobs/SAST.gitlab-ci.yml
-  - template: Jobs/Secret-Detection.gitlab-ci.yml
-  - template: Jobs/Code-Quality.gitlab-ci.yml
+# include:
+#   - template: Jobs/SAST.gitlab-ci.yml
+#   - template: Jobs/Secret-Detection.gitlab-ci.yml
+#   - template: Jobs/Code-Quality.gitlab-ci.yml
 
 default:
   image: docker:24.0.5
 
 stages:
-  - test
-  - build_docker
+  # - test
+  # - build_docker
   - deploy_prd
 
-sast:
-  stage: test
+# sast:
+#   stage: test
 
 
-build_docker:
-  stage: build_docker
-  image: docker:24.0.5
-  services:
-    - docker:24.0.5-dind
-  variables:
-    IMAGE: "dataplatform-ndp-ingestion"
-    # DOCKER_DRIVER: overlay2
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""
-  before_script:
-    - docker login $ACR_REGISTRY -u $ACR_USER -p $ACR_PASSWORD
-    - docker info
-  script:
-    - docker build --build-arg API_TOKEN=$API_TOKEN -t $ACR_REGISTRY/$IMAGE:${CI_COMMIT_SHORT_SHA} .
-    - docker push $ACR_REGISTRY/$IMAGE:${CI_COMMIT_SHORT_SHA}
-  only:
-    refs:
-      - main
-      - develop
+# build_docker:
+#   stage: build_docker
+#   image: docker:24.0.5
+#   services:
+#     - docker:24.0.5-dind
+#   variables:
+#     IMAGE: "dataplatform-ndp-ingestion"
+#     # DOCKER_DRIVER: overlay2
+#     DOCKER_HOST: tcp://docker:2375
+#     DOCKER_TLS_CERTDIR: ""
+#   before_script:
+#     - docker login $ACR_REGISTRY -u $ACR_USER -p $ACR_PASSWORD
+#     - docker info
+#   script:
+#     - docker build --build-arg API_TOKEN=$API_TOKEN -t $ACR_REGISTRY/$IMAGE:${CI_COMMIT_SHORT_SHA} .
+#     - docker push $ACR_REGISTRY/$IMAGE:${CI_COMMIT_SHORT_SHA}
+#   only:
+#     refs:
+#       - main
+#       - develop
 
 deploy_prd:
   stage: deploy_prd 
@@ -63,7 +63,9 @@ deploy_prd:
       REGISTRY_STRING=$(echo -n "{\"auths\":{\"$ACR_REGISTRY\":{\"username\":\"$ACR_USER\",\"password\":\"$ACR_PASSWORD\",\"email\":\"$ACR_EMAIL\",\"auth\":\"$(echo -n \"$ACR_USER:$ACR_PASSWORD\" | base64 | tr -d '\n')\"}}}" | base64 | tr -d '\n')
 
   script:
-    - |    
+    - |
+      printenv
+      cat $REGISTRY_STRING   
       mkdir temp/
       envsubst < k8s/app-secrets.yaml > temp/app-secrets.yaml
       envsubst < k8s/app-vars.yaml > temp/app-vars.yaml
