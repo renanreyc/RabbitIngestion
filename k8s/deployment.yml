@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ndp-ingestion
-  namespace: dataplatform-ingestion
+  namespace: ${NAMESPACE}
   labels:
     app: ndp-ingestion
 spec:
@@ -19,13 +19,18 @@ spec:
       - name: acrprdng011920179-auth
       containers:
         - name: ndp-ingestion
-          image: acrprdng01.azurecr.io/dataplatform-ndp-ingestion:0.0.1
+          image: acrprdng01.azurecr.io/dataplatform-ndp-ingestion:${CI_COMMIT_SHORT_SHA}
           imagePullPolicy: Always
+          volumeMounts:
+          - mountPath: ${TEMP_FOLDER}
+            name: temp-files
           command: ["python"]
           args: ["src/process.py"]
           envFrom:
             - secretRef:
-                name: ndp-ingestion-secrets
+                name: ncs-app-secrets
+            - configMapRef:
+                name: ncs-app-vars
           ports:
             - containerPort: 8079
           resources:
@@ -34,4 +39,8 @@ spec:
               memory: 512Mi
             requests:
               cpu: 500m
-              memory: 256Mi         
+              memory: 256Mi
+      volumes:
+      - name: temp-files
+        persistentVolumeClaim:
+          claimName: pvc-ncs-ingestion-data

@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-ncs-ingestion-data
+  namespace: ${NAMESPACE}
+  annotations:
+    csi.storage.k8s.io/node-publish-secret-name: ncs-obs-user      # Custom secret name.
+    csi.storage.k8s.io/node-publish-secret-namespace: ${NAMESPACE} # Namespace of the custom secret.
+    volume.beta.kubernetes.io/storage-provisioner: everest-csi-provisioner
+    csi.storage.k8s.io/fstype: obsfs
+spec:
+  accessModes:
+  - ReadWriteMany                  # The value must be ReadWriteMany for OBS.
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: csi-obs       # Storage class name, which must be the same as that of the PV.
+  volumeName: pv-ncs-ingestion-data   # PV name.

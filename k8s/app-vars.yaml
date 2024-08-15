@@ -1,0 +1,19 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: ncs-app-vars
+  namespace: ${NAMESPACE}
+data:
+    aws_endpoint_url: https://obs.la-south-2.myhuaweicloud.com
+    aws_region_name: LA-Santiago
+    aws_bucket_name: ${RAW_BUCKET_NAME}
+    aws_root_path: transformation
+    aws_s3_allow_unsafe_rename: "true"
+    ct_threads: "1"
+    ncs_get_url: http://ncs-stg-01.viveiro.local/catalog/
+    ncs_post_url: http://ncs-stg-01.viveiro.local/ingestion/
+    ncs_output_root_path: ${LOCAL_TEMP_FOLDER}
+    
+    # Rabbit
+    rabbit_queue: ngpc.DpVisibilidadeVarejo.in.queue
+    rabbit_port: "5672"
