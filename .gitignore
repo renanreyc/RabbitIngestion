@@ -1,0 +1,12 @@
+*.pyc
+*.pyo
+
+/venv
+/mnt
+data/
+.vscode/
+.env
+.env.preprod
+.env.prd
+__pycache__
+
