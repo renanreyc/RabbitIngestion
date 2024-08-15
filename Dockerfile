@@ -12,7 +12,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN mkdir -p /mnt/ncs-ingestion-temp-file
 
 COPY src/ /app/src/
-COPY .env /app/.env
 
 EXPOSE 8079
 
