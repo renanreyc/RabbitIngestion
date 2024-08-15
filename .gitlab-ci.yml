@@ -52,12 +52,12 @@ deploy_prd:
   before_script:
     - |
       # Set environment variables based on environment
-      RABBIT_USER=$(echo -n "$RABBIT_USER_PRD" | base64) 
-      RABBIT_PASS=$(echo -n "$RABBIT_PASS_PRD" | base64)
-      RABBIT_HOST=$(echo -n "$RABBIT_HOST_PRD" | base64) 
-      RABBIT_VIRTUAL_HOST=$(echo -n "$RABBIT_VIRTUAL_HOST_PRD" | base64)
-      HWC_ACCESS_KEY=$(echo -n "$HWC_ACCESS_KEY_PRD" | base64)
-      HWC_SECRET_KEY=$(echo -n "$HWC_SECRET_KEY_PRD" | base64)
+      export RABBIT_USER=$(echo -n "$RABBIT_USER_PRD" | base64) 
+      export RABBIT_PASS=$(echo -n "$RABBIT_PASS_PRD" | base64)
+      export RABBIT_HOST=$(echo -n "$RABBIT_HOST_PRD" | base64) 
+      export RABBIT_VIRTUAL_HOST=$(echo -n "$RABBIT_VIRTUAL_HOST_PRD" | base64)
+      export HWC_ACCESS_KEY=$(echo -n "$HWC_ACCESS_KEY_PRD" | base64)
+      export HWC_SECRET_KEY=$(echo -n "$HWC_SECRET_KEY_PRD" | base64)
       export REGISTRY_STRING=$(echo -n "{\"auths\":{\"$ACR_REGISTRY\":{\"username\":\"$ACR_USER\",\"password\":\"$ACR_PASSWORD\",\"email\":\"$ACR_EMAIL\",\"auth\":\"$(echo -n \"$ACR_USER:$ACR_PASSWORD\" | base64 | tr -d '\n')\"}}}" | base64 | tr -d '\n')
 
   script:
