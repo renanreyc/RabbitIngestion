@@ -3,7 +3,7 @@ kind: PersistentVolume
 metadata:
   annotations:
     pv.kubernetes.io/provisioned-by: everest-csi-provisioner
-  name: pv-ncs-ingestion-data
+  name: pv-ndp-ingestion-data
   labels: {}
 spec:
   accessModes:
@@ -20,7 +20,7 @@ spec:
       storage.kubernetes.io/csiProvisionerIdentity: everest-csi-provisioner
       everest.io/region: la-south-2
     nodePublishSecretRef:
-      name: ncs-obs-user
+      name: ndp-obs-user
       namespace: ${NAMESPACE}
   persistentVolumeReclaimPolicy: Retain
   storageClassName: csi-obs

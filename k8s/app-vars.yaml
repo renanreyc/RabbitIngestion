@@ -1,7 +1,7 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: ncs-app-vars
+  name: ndp-app-vars
   namespace: ${NAMESPACE}
 data:
     aws_endpoint_url: https://obs.la-south-2.myhuaweicloud.com

@@ -58,7 +58,7 @@ deploy_prd:
       RABBIT_VIRTUAL_HOST=$(echo -n "$RABBIT_VIRTUAL_HOST_PRD" | base64)
       HWC_ACCESS_KEY=$(echo -n "$HWC_ACCESS_KEY_PRD" | base64)
       HWC_SECRET_KEY=$(echo -n "$HWC_SECRET_KEY_PRD" | base64)
-      REGISTRY_STRING=$(echo -n "{\"auths\":{\"$ACR_REGISTRY\":{\"username\":\"$ACR_USER\",\"password\":\"$ACR_PASSWORD\",\"email\":\"$ACR_EMAIL\",\"auth\":\"$(echo -n "$ACR_USER:$ACR_PASSWORD" | base64)\"}}}" | base64)
+      REGISTRY_STRING=$(echo -n "{\"auths\":{\"$ACR_REGISTRY\":{\"username\":\"$ACR_USER\",\"password\":\"$ACR_PASSWORD\",\"email\":\"$ACR_EMAIL\",\"auth\":\"$(echo -n "$ACR_USER:$ACR_PASSWORD" | base64 | tr -d '\n')\"}}}")
 
   script:
     - |    
