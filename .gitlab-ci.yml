@@ -1,40 +1,39 @@
-# include:
-#   - template: Jobs/SAST.gitlab-ci.yml
-#   - template: Jobs/Secret-Detection.gitlab-ci.yml
-#   - template: Jobs/Code-Quality.gitlab-ci.yml
+include:
+  - template: Jobs/SAST.gitlab-ci.yml
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+  - template: Jobs/Code-Quality.gitlab-ci.yml
 
 default:
   image: docker:24.0.5
 
 stages:
-  # - test
-  # - build_docker
+  - test
+  - build_docker
   - deploy_prd
 
-# sast:
-#   stage: test
+sast:
+  stage: test
 
 
-# build_docker:
-#   stage: build_docker
-#   image: docker:24.0.5
-#   services:
-#     - docker:24.0.5-dind
-#   variables:
-#     IMAGE: "dataplatform-ndp-ingestion"
-#     # DOCKER_DRIVER: overlay2
-#     DOCKER_HOST: tcp://docker:2375
-#     DOCKER_TLS_CERTDIR: ""
-#   before_script:
-#     - docker login $ACR_REGISTRY -u $ACR_USER -p $ACR_PASSWORD
-#     - docker info
-#   script:
-#     - docker build --build-arg API_TOKEN=$API_TOKEN -t $ACR_REGISTRY/$IMAGE:${CI_COMMIT_SHORT_SHA} .
-#     - docker push $ACR_REGISTRY/$IMAGE:${CI_COMMIT_SHORT_SHA}
-#   only:
-#     refs:
-#       - main
-#       - develop
+build_docker:
+  stage: build_docker
+  image: docker:24.0.5
+  services:
+    - docker:24.0.5-dind
+  variables:
+    IMAGE: "dataplatform-ndp-ingestion"
+    # DOCKER_DRIVER: overlay2
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker login $ACR_REGISTRY -u $ACR_USER -p $ACR_PASSWORD
+    - docker info
+  script:
+    - docker build --build-arg API_TOKEN=$API_TOKEN -t $ACR_REGISTRY/$IMAGE:${CI_COMMIT_SHORT_SHA} .
+    - docker push $ACR_REGISTRY/$IMAGE:${CI_COMMIT_SHORT_SHA}
+  only:
+    refs:
+      - main
 
 deploy_prd:
   stage: deploy_prd 
@@ -42,7 +41,6 @@ deploy_prd:
   only:
     refs:
       - main
-      - develop
   variables:
     NAMESPACE: dataplatform-ingestion
     RAW_BUCKET_NAME: bucket-prd-data-platform-raw-01
@@ -69,11 +67,10 @@ deploy_prd:
       envsubst < k8s/app-vars.yaml > temp/app-vars.yaml
       envsubst < k8s/deployment.yml > temp/deployment.yml
       envsubst < k8s/registry-secrets.yml > temp/registry-secrets.yml
-      cat temp/registry-secrets.yml
-  # envsubst < k8s/obs-secret.yaml > temp/obs-secret.yaml
-  # envsubst < k8s/shared-pv.yaml > temp/shared-pv.yaml
-  # envsubst < k8s/shared-pvc.yaml > temp/shared-pvc.yaml
-  # cat "$PRD_KUBE_CONFIG" > kubeconfig.yaml
-  # kubectl --kubeconfig kubeconfig.yaml create namespace $NAMESPACE || echo "namespace $NAMESPACE ja existe"
-  # kubectl --kubeconfig kubeconfig.yaml -n $NAMESPACE apply -f temp/
+      envsubst < k8s/obs-secret.yaml > temp/obs-secret.yaml
+      envsubst < k8s/shared-pv.yaml > temp/shared-pv.yaml
+      envsubst < k8s/shared-pvc.yaml > temp/shared-pvc.yaml
+      cat "$PRD_KUBE_CONFIG" > kubeconfig.yaml
+      kubectl --kubeconfig kubeconfig.yaml create namespace $NAMESPACE || echo "namespace $NAMESPACE ja existe"
+      kubectl --kubeconfig kubeconfig.yaml -n $NAMESPACE apply -f temp/
   
