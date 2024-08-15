@@ -64,7 +64,6 @@ deploy_prd:
 
   script:
     - |
-      printenv
       cat $REGISTRY_STRING   
       mkdir temp/
       envsubst < k8s/app-secrets.yaml > temp/app-secrets.yaml
