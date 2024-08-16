@@ -10,10 +10,10 @@ data:
     aws_root_path: transformation
     aws_s3_allow_unsafe_rename: "true"
     ct_threads: "1"
-    ncs_get_url: http://ncs-stg-01.viveiro.local/catalog/
-    ncs_post_url: http://ncs-stg-01.viveiro.local/ingestion/
+    ncs_get_url: http://ncs-prd-01.viveiro.local/catalog/
+    ncs_post_url: http://ncs-prd-01.viveiro.local/ingestion/
     ncs_output_root_path: ${LOCAL_TEMP_FOLDER}
     
     # Rabbit
-    rabbit_queue: ngpc.DpVisibilidadeVarejo.in.queue
+    rabbit_queue: ngpc.dataplatform_proxy_ingestion.in.queue
     rabbit_port: "5672"

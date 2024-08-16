@@ -46,7 +46,6 @@ deploy_prd:
     RAW_BUCKET_NAME: bucket-prd-data-platform-raw-01
     BUCKET_PV_NAME: bucket-prd-data-platform-ingestion-data-01
     LOCAL_TEMP_FOLDER: mnt/ncs-ingestion-temp-file
-    ACR_EMAIL: ServicePrincipal@AzureRM
   tags:
     - winn-deploy
   before_script:
