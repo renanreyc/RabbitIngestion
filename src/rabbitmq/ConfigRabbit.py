@@ -86,7 +86,7 @@ class ConsumeRabbit:
         # -----------------------------------------------------------------------------------------
         layout = str(rabbit_json["layout"])  # "NGP001#PROCESS#17132107640011222798"
         layout_formated = layout.replace("#", "%23")
-        original_filename = rabbit_json["originalFilename"]  # "32231204876292000181550010000338271782107024-nfe.ngp"
+        original_filename = rabbit_json["originalFilename"]  # "/dawda/32231204876292000181550010000338271782107024-nfe.ngp"
         tenant = str(rabbit_json["tenant"])  # "trimak"
         document_type = str(rabbit_json["documentType"])  # 143
         repository_id = rabbit_json["repositoryId"]
@@ -96,13 +96,15 @@ class ConsumeRabbit:
         # -----------------------------------------------------------------------------------------
         # --Download NCS---------------------------------------------------------------------------
         # -----------------------------------------------------------------------------------------       
-        if origin == 'horus':
-            file_path_out = "/".join([self.__aws_root, original_filename])
-        elif "params" in rabbit_json and "ngmapping" in rabbit_json["params"]:
-            ngmapping = rabbit_json["params"]["ngmapping"]
-            file_path_out = "/".join([self.__aws_root, system, tenant, document_type, ngmapping, original_filename]) 
+        if "params" in rabbit_json and "path_default" in rabbit_json["params"]:
+            if "ngmapping" in rabbit_json["params"]:
+                ngmapping = rabbit_json["params"]["ngmapping"]
+                file_path_out = "/".join([self.__aws_root, system, tenant, document_type, ngmapping, original_filename]) 
+            else:
+                file_path_out = "/".join([self.__aws_root, system, tenant, document_type, original_filename])
         else:
-            file_path_out = "/".join([self.__aws_root, system, tenant, document_type, original_filename])
+            file_path_out = "/".join([self.__aws_root, original_filename])
+        
 
         
         temp_file_path_out = "/".join([self.__temp_root, file_path_out])
