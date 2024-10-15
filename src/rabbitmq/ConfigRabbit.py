@@ -1,4 +1,5 @@
 import json
+import uuid
 import pika
 import os
 import threading
@@ -33,11 +34,12 @@ class ConsumeRabbit:
                                                 credentials=credentials)
         # Conectando ao servidor RabbitMQ com autenticação
         connection = pika.BlockingConnection(parameters)
-        channel = connection.channel()
-        return channel
+ 
+        return connection
 
     def consume_messages(self, queue):
-        channel = self.__create_connection_rabbit()
+        connection = self.__create_connection_rabbit()
+        channel = connection.channel()
         self._utils.logging_status('created connection rabbit')
 
         # Declarando a fila
@@ -84,6 +86,8 @@ class ConsumeRabbit:
         # -----------------------------------------------------------------------------------------
         # --Get Metadata---------------------------------------------------------------------------
         # -----------------------------------------------------------------------------------------
+        rx_resource = str(uuid.uuid4())  # Gerar um código aleatório para rxResource
+        idDeliveryQueue = rabbit_json.get('idDeliveryQueue', 0)
         layout = str(rabbit_json["layout"])  # "NGP001#PROCESS#17132107640011222798"
         layout_formated = layout.replace("#", "%23")
         original_filename = rabbit_json["originalFilename"]  # "/dawda/32231204876292000181550010000338271782107024-nfe.ngp"
@@ -91,6 +95,10 @@ class ConsumeRabbit:
         document_type = str(rabbit_json["documentType"])  # 143
         repository_id = rabbit_json["repositoryId"]
         origin = rabbit_json['origin']
+
+        print(f'idDeliveryQueue: {idDeliveryQueue}')
+        print(f'tenant: {tenant}')
+        print(f'rx_resource: {rx_resource}')
         
         system = str(routing_key.split('.')[1])
         # -----------------------------------------------------------------------------------------
@@ -132,12 +140,58 @@ class ConsumeRabbit:
         obs.upload_file(file_path_in=temp_file_compressed_path, file_path_out=file_path_out)
 
         # -----------------------------------------------------------------------------------------
+        # --Envia a mensagem de confirmação ao RabbitMQ--------------------------------------------
+        # -----------------------------------------------------------------------------------------
+        
+        self.send_ack_message(
+            system_code=system,
+            status=0,  # Status 0 para sucesso
+            id_delivery_queue=idDeliveryQueue, 
+            rx_resource=rx_resource,
+            tenant_code=tenant
+        )
+
+        # -----------------------------------------------------------------------------------------
         # --Confirma ao rabbitMQ que a mensagem foi processada e pode ser excluída.----------------
         # -----------------------------------------------------------------------------------------
         self._utils.logging_status('returned to RabbitMQ that message was delivered.')
         ch.basic_ack(delivery_tag = method.delivery_tag)
 
         return None
+
+    def send_ack_message(self, system_code, status, id_delivery_queue, rx_resource, tenant_code):
+        # Defina a conexão com o RabbitMQ
+        connection = self.__create_connection_rabbit()
+        channel = connection.channel()
+
+        # Defina o nome da rota (Routing Key)
+        routing_key = f'ngpc.{system_code}.in.ack.route'
+
+        properties = pika.BasicProperties(
+            content_type='application/json',
+            headers={
+                '__TypeId__': 'com.neogrid.ngproxy.dto.ngpc.ConnectorToNgpAckDto'
+            }
+        )
+
+        message = {
+            "status": status,
+            "idDeliveryQueue": id_delivery_queue,
+            "rxResource": rx_resource[:64], 
+            "tenantCode": tenant_code
+        }
+
+        channel.basic_publish(
+            exchange=f'ngpc.{tenant_code}.topic',
+            routing_key=routing_key,
+            body=json.dumps(message),
+            properties=properties
+        )
+
+        print(f"Mensagem enviada para a rota {routing_key}: {message}")
+        
+        connection.close()
+
 
     def consume_from_multiple_queues(self, queues):
         threads = []
